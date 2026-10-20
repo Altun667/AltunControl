@@ -107,7 +107,7 @@ body.guest .adm{display:none!important}
 <div id="scr"><div id="sbar"><div id="mons"></div><button onclick="scrClose()">✕ Kapat</button></div><img id="simg"></div>
 <div id="toast"></div>
 <script>
-const $=id=>document.getElementById(id);const _s=new URLSearchParams(location.search),_q=_s.get('pin');if(_s.get('host'))localStorage.pc=_s.get('host');if(_s.get('host2'))localStorage.pc2=_s.get('host2');if(_s.get('back'))sessionStorage.back=_s.get('back');if(_s.get('mac'))localStorage.mac=_s.get('mac');if(_q){localStorage.setItem('pin',_q);history.replaceState(null,'',location.pathname)}
+const $=id=>document.getElementById(id);const _s=new URLSearchParams(location.search),_q=_s.get('pin');if(_s.get('host'))localStorage.pc=_s.get('host');if(_s.get('host2'))localStorage.pc2=_s.get('host2');if(_s.get('back'))sessionStorage.back=_s.get('back');if(_s.get('id'))localStorage.pcid=_s.get('id');if(_s.get('mac'))localStorage.mac=_s.get('mac');if(_q){localStorage.setItem('pin',_q);history.replaceState(null,'',location.pathname)}
 let PIN=localStorage.getItem('pin')||'',timer,APPS=[],SCN=[],INST=[],waking=0;
 const norm=v=>{v=(v||'').trim();if(!v)return'';if(!/^http/.test(v))v='http://'+v;return v.replace(/\/$/,'')};
 const ADDRS=[norm(localStorage.pc),norm(localStorage.pc2)].filter(Boolean),RELAY=norm(localStorage.relay);let BASE=ADDRS[0]||'',loaded=0;
@@ -120,7 +120,7 @@ async function api(u,b,msg,base){buzz();try{const r=await fetch((base===undefine
 if(r.status==401){$('login').hidden=false;if(PIN)toast('PIN yanlış');return null}
 const j=await r.json();if(msg&&j.ok)toast(msg);if(j.error)toast('Hata: '+j.error);return j}catch(e){toast('Ulaşılamadı');return null}}
 function setOnline(v,name){$('hd').classList.toggle('on',!!v);$('st').textContent=v?'Çevrimiçi':'Çevrimdışı';if(name)$('pcname').textContent=name}
-async function ping(){if(waking)return;try{const r=await fetch(BASE+'/api/status',{headers:{'X-Pin':PIN}});if(r.status==401)return;const j=await r.json();setOnline(1,j.name);role(j.role);if(!loaded)load()}catch(e){setOnline(0);if(ADDRS.length>1)BASE=ADDRS[(ADDRS.indexOf(BASE)+1)%ADDRS.length]}}
+async function ping(){if(waking)return;try{const r=await fetch(BASE+'/api/status',{headers:{'X-Pin':PIN}});if(r.status==401)return;const j=await r.json();setOnline(1,j.name);role(j.role);fails=0;if(!loaded)load()}catch(e){setOnline(0);fails++;if(fails>=3)rediscover();if(ADDRS.length>1)BASE=ADDRS[(ADDRS.indexOf(BASE)+1)%ADDRS.length]}}
 function render(j){APPS=j.apps;
 $('apps').innerHTML=j.apps.map(a=>`<button class="app" oncontextmenu="del(${a.id});return false" onclick="api('/api/launch',{id:${a.id}},'Açılıyor…')"><span>${a.icon}</span>${a.name}</button>`).join('')+`<button class="app adm" onclick="picker()"><span>➕</span>Ekle</button>`;
 SCN=j.scenes;
@@ -218,6 +218,14 @@ const a=(d.assets||[]).find(x=>x.name.toLowerCase().endsWith('.apk')),num=v=>(v.
 for(let i=0;i<Math.max(n.length,c.length);i++){if((n[i]||0)!==(c[i]||0)){nw=(n[i]||0)>(c[i]||0);break}}
 if(nw&&a){APKU=a.browser_download_url;$('updapk').hidden=false;$('updk').firstChild.textContent='Telefon uygulaması için yeni sürüm: '+d.tag_name}}catch(e){}}
 function doApkUpdate(){const r=Android.installUpdate(APKU);toast(r=='izin'?'Kurulum iznini ver, sonra tekrar bas':r=='ok'?'İndiriliyor… bitince kurulum ekranı açılır':'Güncelleme başlatılamadı')}
+let fails=0,scanning=0,lastScan=0;
+async function rediscover(){const m=(ADDRS[0]||'').match(/^http:\/\/(\d+\.\d+\.\d+)\.\d+(:\d+)?$/);
+if(!m||scanning||Date.now()-lastScan<120000)return;scanning=1;lastScan=Date.now();
+const id=localStorage.pcid,port=m[2]||':8765';let hit=null;
+const probe=async ip=>{if(hit)return;try{const r=await fetch('http://'+ip+port+'/api/hello',{signal:AbortSignal.timeout(900)});const j=await r.json();if(j.app=='AltunControl'&&(!id||j.id==id))hit=ip+port}catch(e){}};
+const ips=[...Array(254)].map((_,i)=>m[1]+'.'+(i+1));
+for(let i=0;i<254&&!hit;i+=50)await Promise.all(ips.slice(i,i+50).map(probe));
+scanning=0;if(hit){localStorage.pc=hit;ADDRS[0]='http://'+hit;BASE=ADDRS[0];fails=0;loaded=0;toast('PC yeni adreste bulundu');if(window.Android)syncWidget();ping()}}
 function saveConn(){localStorage.pc=$('pcu').value;localStorage.pc2=$('pc2u').value;localStorage.relay=$('rly').value;location.reload()}
 function go(){PIN=$('pin').value;localStorage.setItem('pin',PIN);load()}
 function logout(){localStorage.removeItem('pin');PIN='';$('login').hidden=false}

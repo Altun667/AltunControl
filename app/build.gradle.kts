@@ -1,6 +1,6 @@
 plugins { id("com.android.application"); id("org.jetbrains.kotlin.android") }
 // Surum numarasi GitHub etiketinden gelir (ornek: 2.0.0.1), her yeni etiketle otomatik artar
-val verName = ((project.findProperty("appVersion") as String?) ?: "2.0.0.0").trim().trimStart('v', 'V')
+val verName = ((project.findProperty("appVersion") as String?) ?: "2.2.0.0").trim().trimStart('v', 'V')
 val verParts = verName.split(".").map { it.filter { c -> c.isDigit() }.toIntOrNull() ?: 0 } + listOf(0, 0, 0, 0)
 val verCode = verParts[0] * 1000000 + verParts[1] * 10000 + verParts[2] * 100 + verParts[3]
 android {

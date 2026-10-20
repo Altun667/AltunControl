@@ -109,7 +109,8 @@ class MainActivity : Activity() {
             q = "?host=" + Uri.encode(d.getQueryParameter("host") ?: "") +
                 "&host2=" + Uri.encode(d.getQueryParameter("host2") ?: "") +
                 "&pin=" + Uri.encode(d.getQueryParameter("pin") ?: "") +
-                "&mac=" + Uri.encode(d.getQueryParameter("mac") ?: "")
+                "&mac=" + Uri.encode(d.getQueryParameter("mac") ?: "") +
+                "&id=" + Uri.encode(d.getQueryParameter("id") ?: "")
         }
         web.loadUrl("file:///android_asset/index.html$q")
     }
