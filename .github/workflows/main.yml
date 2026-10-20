@@ -23,7 +23,7 @@ jobs:
             echo "$KS" | base64 -d > "$RUNNER_TEMP/altun.keystore"
             echo "KEYSTORE_FILE=$RUNNER_TEMP/altun.keystore" >> "$GITHUB_ENV"
           fi
-      - run: gradle assembleDebug --no-daemon
+      - run: gradle assembleDebug --no-daemon -PappVersion=${{ github.event.release.tag_name || '2.0.0.0' }}
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
