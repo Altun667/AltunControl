@@ -1,0 +1,14 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="horizontal" android:background="@drawable/widget_bg"
+    android:padding="6dp" android:gravity="center">
+    <TextView android:id="@+id/w_wake" android:layout_width="0dp" android:layout_height="match_parent"
+        android:layout_weight="1" android:gravity="center" android:text="⚡ PC aç"
+        android:textColor="#E8B931" android:textSize="14sp" android:textStyle="bold" />
+    <TextView android:id="@+id/w_s1" android:layout_width="0dp" android:layout_height="match_parent"
+        android:layout_weight="1" android:gravity="center" android:singleLine="true"
+        android:textColor="#FFFFFF" android:textSize="14sp" />
+    <TextView android:id="@+id/w_s2" android:layout_width="0dp" android:layout_height="match_parent"
+        android:layout_weight="1" android:gravity="center" android:singleLine="true"
+        android:textColor="#FFFFFF" android:textSize="14sp" />
+</LinearLayout>

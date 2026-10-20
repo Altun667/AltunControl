@@ -1,0 +1,6 @@
+*.keystore
+*.jks
+GITHUB-SECRETS.txt
+build/
+.gradle/
+local.properties
